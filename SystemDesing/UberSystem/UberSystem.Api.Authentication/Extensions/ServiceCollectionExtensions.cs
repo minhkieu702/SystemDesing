@@ -36,9 +36,10 @@ namespace UberSystem.Api.Authentication.Extensions
         	services.AddScoped<Func<UberSystemDbContext>>((provider) => () => provider.GetService<UberSystemDbContext>());
             services.AddScoped<DbFactory>();
         	services.AddScoped<IUnitOfWork, UnitOfWork>();
-            services.AddIdentity<User, IdentityRole>()
-				.AddEntityFrameworkStores<UberSystemDbContext>()
-				.AddDefaultTokenProviders();
+            services.AddScoped<IUserService, UserService>();
+    //        services.AddIdentity<User, IdentityRole<int>>()
+				//.AddEntityFrameworkStores<UberSystemDbContext>()
+				//.AddDefaultTokenProviders();
 			// Configure JWT authentication
 			var jwtSettings = configuration.GetSection("JwtSettings");
 			var key = Encoding.ASCII.GetBytes(jwtSettings["SecretKey"]);
@@ -68,9 +69,16 @@ namespace UberSystem.Api.Authentication.Extensions
     	/// </summary>
     	/// <param name="services"></param>
     	/// <returns></returns>
-    	public static IServiceCollection AddServices(this IServiceCollection services)
-    	{
-        	return services.AddScoped<ICabService, CabService>();
-    	}
-	}
+    	//public static IServiceCollection AddServices(this IServiceCollection services)
+    	//{
+     //   	return services.AddScoped<ICabService, CabService>();
+    	//}
+        public static IServiceCollection AddServices(this IServiceCollection services)
+        {
+            services.AddScoped<ICabService, CabService>();
+            services.AddScoped(typeof(TokenService));
+
+            return services;
+        }
+    }
 }

@@ -12,9 +12,27 @@ namespace UberSystem.Service
             _unitOfWork = unitOfWork;
 		}
 
-        public Task Add(User user)
+        public async Task<int> Add(User user)
         {
-            throw new NotImplementedException();
+            try
+            {
+                await _unitOfWork.BeginTransaction();
+                var UserRepos = _unitOfWork.Repository<User>();
+                var objUser = await UserRepos.GetAllAsync();
+                if (objUser.Any(c => c.Email.Equals(user.Email)))
+                    return 0;
+                var rnd = new Random();
+                user.Id = long.Parse(rnd.Next().ToString());
+                user.Role = 0;
+                await UserRepos.InsertAsync(user);
+                await _unitOfWork.CommitTransaction();
+                return 1;
+            }
+            catch
+            {
+                await _unitOfWork.RollbackTransaction();
+                return -1;
+            }
         }
 
         public Task CheckPasswordAsync(User user)
@@ -25,6 +43,20 @@ namespace UberSystem.Service
         public Task<User> FindByEmail(string email)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<List<User>> GetAll()
+        {
+            try
+            {
+                var userRepo = _unitOfWork.Repository<User>();
+                var objUsers = await userRepo.GetAllAsync();
+                return objUsers != null && objUsers.Count > 0 ? objUsers.ToList() : new List<User>();
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         public async Task<bool> Login(User user)
